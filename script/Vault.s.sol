@@ -11,7 +11,7 @@ contract VaultScript is Script {
     function run() public {
         // vm.broadcast();
         vm.startBroadcast();
-        VaultUSDT usdt = new VaultUSDT();
+        USDT usdt = new USDT();
         new Vault(usdt, "Vault USDT", "vUSDT");
 
         vm.stopBroadcast();
