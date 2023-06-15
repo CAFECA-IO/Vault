@@ -44,7 +44,7 @@ contract Vault is ERC4626 {
         // Info: mints the reciept(shares) (20230615 - tzuhan)
         _mint(msg.sender, assets);
 
-        emit Deposit(address(this), msg.sender, assets, shareHolder[msg.sender]);
+        emit Deposit(msg.sender, address(this), assets, shareHolder[msg.sender]);
     }
 
     // Info: users to return shares and get thier token back before they can withdraw, and requires that the user has a deposit (20230615 - tzuhan)
