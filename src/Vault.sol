@@ -60,6 +60,8 @@ contract Vault is ERC4626 {
 
         _burn(msg.sender, shares);
 
+        assets = shares; // + percetange; // Info: disabled for now (20230615 - tzuhan)
+
         emit Withdraw(address(this), receiver, msg.sender, assets, shares);
         return assets;
     }
