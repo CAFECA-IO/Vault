@@ -60,8 +60,6 @@ contract Vault is ERC4626 {
 
         _burn(msg.sender, shares);
 
-        assets = shares + percetange;
-
         emit Withdraw(address(this), receiver, msg.sender, assets, shares);
         return assets;
     }
