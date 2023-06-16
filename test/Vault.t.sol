@@ -11,7 +11,7 @@ contract VaultTest is Test {
 
     function setUp() public {
         usdt = new USDT("TideBit USDT", "tbUSDT");
-        vault = new Vault(address(0x6e642065B9976FbDF94aB373a4833A48F040BfF3), "Vault USDT", "vUSDT");
+        vault = new Vault(usdt, "Vault USDT", "vUSDT");
     }
 
     function testTotalAssets() public {
