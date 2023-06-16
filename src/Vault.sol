@@ -96,7 +96,7 @@ contract Vault is ERC4626 {
         emit TransferShares(msg.sender, receiver, shares);
     }
 
-    function transfer(address receiver, uint256 shares) public virtual override returns (bool) {
+    function transfer(address receiver, uint256 shares) public virtual override(ERC20, IERC20) returns (bool) {
         _transfer(msg.sender, receiver, shares);
 
         shareHolder[msg.sender] -= shares;
