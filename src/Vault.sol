@@ -75,12 +75,23 @@ contract Vault is ERC4626 {
         _vUSDT.transfer(msg.sender, payout);
     }
 
-    function transferShares(uint256 shares, address receiver) public {
+    // function transferShares(uint256 shares, address receiver) public {
+    //     _transfer(msg.sender, receiver, shares);
+
+    //     shareHolder[msg.sender] -= shares;
+    //     shareHolder[receiver] += shares;
+
+    //     emit TransferShares(msg.sender, receiver, shares);
+    // }
+
+    function transfer(address receiver, uint256 shares) public virtual override returns (bool) {
         _transfer(msg.sender, receiver, shares);
 
         shareHolder[msg.sender] -= shares;
         shareHolder[receiver] += shares;
 
         emit TransferShares(msg.sender, receiver, shares);
+
+        return true;
     }
 }
