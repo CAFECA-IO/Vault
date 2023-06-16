@@ -10,6 +10,8 @@ contract Vault is ERC4626 {
     // Info: a mapping that checks if a user has deposited (20230615 - tzuhan)
     mapping(address => uint256) public shareHolder;
 
+    event TransferShares(address indexed from, address indexed to, uint256 value);
+
     constructor(ERC20 _asset, string memory _name, string memory _symbol) ERC4626(_asset) ERC20(_name, _symbol) {
         _vUSDT = _asset;
     }
@@ -29,7 +31,8 @@ contract Vault is ERC4626 {
     }
 
     function totalSharesOfUser(address _user) public view returns (uint256) {
-        return this.balanceOf(_user);
+        // return this.balanceOf(_user);
+        return shareHolder[_user];
     }
 
     // Info: a deposit function that receives assets from users (20230615 - tzuhan)
@@ -44,11 +47,11 @@ contract Vault is ERC4626 {
         // Info: mints the reciept(shares) (20230615 - tzuhan)
         _mint(msg.sender, assets);
 
-        emit Deposit(msg.sender, address(this), assets, shareHolder[msg.sender]);
+        emit Deposit(msg.sender, msg.sender, assets, shareHolder[msg.sender]);
     }
 
     // Info: users to return shares and get thier token back before they can withdraw, and requires that the user has a deposit (20230615 - tzuhan)
-    function _redeem(uint256 shares, address receiver) internal returns (uint256 assets) {
+    function _redeem(uint256 shares) internal returns (uint256 assets) {
         require(shareHolder[msg.sender] > 0, "Not a share holder");
         shareHolder[msg.sender] -= shares;
 
@@ -62,13 +65,22 @@ contract Vault is ERC4626 {
 
         assets = shares; // + percetange; // Info: disabled for now (20230615 - tzuhan)
 
-        emit Withdraw(address(this), receiver, msg.sender, assets, shares);
+        emit Withdraw(msg.sender, msg.sender, msg.sender, assets, shares);
         return assets;
     }
 
     // Info:  allow msg.sender to withdraw his deposit plus interest (20230615 - tzuhan)
-    function withdraw(uint256 shares, address receiver) public {
-        uint256 payout = _redeem(shares, receiver);
-        _vUSDT.transfer(receiver, payout);
+    function withdraw(uint256 shares) public {
+        uint256 payout = _redeem(shares);
+        _vUSDT.transfer(msg.sender, payout);
+    }
+
+    function transferShares(uint256 shares, address receiver) public {
+        _transfer(msg.sender, receiver, shares);
+
+        shareHolder[msg.sender] -= shares;
+        shareHolder[receiver] += shares;
+
+        emit TransferShares(msg.sender, receiver, shares);
     }
 }

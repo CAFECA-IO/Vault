@@ -6,12 +6,12 @@ import "../src/Vault.sol";
 import "../src/USDT.sol";
 
 contract VaultTest is Test {
-    Vault public vault;
     USDT public usdt;
+    Vault public vault;
 
     function setUp() public {
-        usdt = new USDT();
-        vault = new Vault(usdt, 'Vault USDT', 'vUSDT');
+        usdt = new USDT("TideBit USDT", "tbUSDT");
+        vault = new Vault(address(0x6e642065B9976FbDF94aB373a4833A48F040BfF3), "Vault USDT", "vUSDT");
     }
 
     function testTotalAssets() public {
@@ -44,7 +44,7 @@ contract VaultTest is Test {
         assertEq(vault.totalAssets(), 100);
         assertEq(vault.totalSharesOfUser(address(this)), 100);
         assertEq(vault.totalAssetsOfUser(address(this)), 0);
-        vault.withdraw(100, address(this));
+        vault.withdraw(100);
         assertEq(vault.totalSharesOfUser(address(this)), 0);
         assertEq(vault.totalAssetsOfUser(address(this)), 100);
         assertEq(vault.totalAssets(), 0);
