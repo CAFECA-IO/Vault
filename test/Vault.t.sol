@@ -15,11 +15,19 @@ contract VaultTest is Test {
     }
 
     function testTotalAssets() public {
-        emit log_named_uint('the vault totalAssets', vault.totalAssets());
+        emit log_named_uint("the vault totalAssets", vault.totalAssets());
         assertEq(vault.totalAssets(), 0);
     }
 
     function testTotalAssetsOfUser(address user) public {
         assertEq(vault.totalAssetsOfUser(user), 0);
+    }
+
+    function testDeposit() public {
+        usdt.mint(address(this), 100);
+        usdt.approve(address(vault), 100);
+        vault.deposit(100);
+        assertEq(vault.totalAssets(), 100);
+        emit log_named_uint("the vault totalAssets", vault.totalAssets());
     }
 }
