@@ -5,19 +5,17 @@ import "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract Vault is ERC4626 {
+    // Deprecate: remove the vUSDT contract (20230617 - tzuhan)
     // Info: create your variables and immutables (20230615 - tzuhan)
     // ERC20 private immutable _vUSDT;
 
     IERC20 public usdt;
 
+    // Deprecate: 不需要 mapping 持有 vUSDT 我們直接認定他持有 shares 即可 (20230617 - tzuhan)
     // Info: a mapping that checks if a user has deposited (20230615 - tzuhan)
-    mapping(address => uint256) public shareHolder;
+    // mapping(address => uint256) public shareHolder;
 
-    event TransferShares(address indexed from, address indexed to, uint256 value);
-
-    // constructor(ERC20 _asset, string memory _name, string memory _symbol) ERC4626(_asset) ERC20(_name, _symbol) {
-    //     _vUSDT = _asset;
-    // }
+    // Info: call_code to the ERC20 contract (要使用別人的智能合約的話只要知道 interface 及 contract address 即可) (20230616 - tzuhan)
     constructor(address _usdtAddress, string memory _name, string memory _symbol)
         ERC4626(IERC20(_usdtAddress))
         ERC20(_name, _symbol)
@@ -27,22 +25,21 @@ contract Vault is ERC4626 {
 
     // Info: returns total number of assets (20230615 - tzuhan)
     function totalAssets() public view override returns (uint256) {
-        // return _vUSDT.balanceOf(address(this));
+
         return usdt.balanceOf(address(this));
     }
 
     // Info: returns total balance of user (20230615 - tzuhan)
     function totalAssetsOfUser(address _user) public view returns (uint256) {
-        // return _vUSDT.balanceOf(_user);
         return usdt.balanceOf(_user);
     }
 
-    // function totalShares() public view returns (uint256) {
-    //     return this.balanceOf(address(this));
-    // }
+    function totalShares() public view returns (uint256) {
+        return this.balanceOf(address(this));
+    }
 
     function totalSharesOfUser(address _user) public view returns (uint256) {
-        return shareHolder[_user];
+        return this.balanceOf(_user);
     }
 
     // Info: a deposit function that receives assets from users (20230615 - tzuhan)
@@ -50,21 +47,20 @@ contract Vault is ERC4626 {
         // Info: checks that the deposit is higher than 0 (20230615 - tzuhan)
         require(assets > 0, "Deposit less than Zero");
 
-        // _vUSDT.transferFrom(msg.sender, address(this), assets);
         usdt.transferFrom(msg.sender, address(this), assets);
 
-        // Info: checks the value of assets the holder has (20230615 - tzuhan)
-        shareHolder[msg.sender] += assets;
-        // Info: mints the reciept(shares) (20230615 - tzuhan)
-        _mint(msg.sender, assets);
+        uint256 shares = assets;
 
-        emit Deposit(msg.sender, msg.sender, assets, shareHolder[msg.sender]);
+        _mint(msg.sender, shares);
+
+        emit Deposit(msg.sender, msg.sender, assets, shares);
     }
 
     // Info: users to return shares and get thier token back before they can withdraw, and requires that the user has a deposit (20230615 - tzuhan)
     function _redeem(uint256 shares) internal returns (uint256 assets) {
-        require(shareHolder[msg.sender] > 0, "Not a share holder");
-        shareHolder[msg.sender] -= shares;
+        uint256 haveShares = totalSharesOfUser(msg.sender);
+        require(haveShares > 0, "Not a share holder");
+        require(haveShares >= shares, "Have less shares than required");
 
         // Info: can give a user a percentage of the total assets as a reward for returning their shares (20230615 - tzuhan)
         /**
@@ -83,28 +79,10 @@ contract Vault is ERC4626 {
     // Info:  allow msg.sender to withdraw his deposit plus interest (20230615 - tzuhan)
     function withdraw(uint256 shares) public {
         uint256 payout = _redeem(shares);
-        // _vUSDT.transfer(msg.sender, payout);
         usdt.transfer(msg.sender, payout);
     }
 
     function transferShares(uint256 shares, address receiver) public {
         _transfer(msg.sender, receiver, shares);
-
-        shareHolder[msg.sender] -= shares;
-        shareHolder[receiver] += shares;
-
-        emit TransferShares(msg.sender, receiver, shares);
     }
-
-    function transfer(address receiver, uint256 shares) public virtual override(ERC20, IERC20) returns (bool) {
-        _transfer(msg.sender, receiver, shares);
-
-        shareHolder[msg.sender] -= shares;
-        shareHolder[receiver] += shares;
-
-        emit TransferShares(msg.sender, receiver, shares);
-
-        return true;
-    }
-
 }
