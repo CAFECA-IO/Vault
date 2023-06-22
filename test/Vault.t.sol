@@ -6,12 +6,12 @@ import "../src/Vault.sol";
 import "../src/USDT.sol";
 
 contract VaultTest is Test {
-    Vault public vault;
     USDT public usdt;
+    Vault public vault;
 
     function setUp() public {
-        usdt = new USDT();
-        vault = new Vault(usdt, 'Vault USDT', 'vUSDT');
+        usdt = new USDT("TideBit USDT", "tbUSDT");
+        vault = new Vault(usdt, "Vault USDT", "vUSDT");
     }
 
     function testTotalAssets() public {
@@ -23,11 +23,30 @@ contract VaultTest is Test {
         assertEq(vault.totalAssetsOfUser(user), 0);
     }
 
+    function testMint() public {
+        usdt.mint(address(this), 100);
+        assertEq(usdt.balanceOf(address(this)), 100);
+    }
+
     function testDeposit() public {
         usdt.mint(address(this), 100);
         usdt.approve(address(vault), 100);
         vault.deposit(100);
         assertEq(vault.totalAssets(), 100);
+        assertEq(vault.totalAssetsOfUser(address(this)), 100);
         emit log_named_uint("the vault totalAssets", vault.totalAssets());
+    }
+
+    function testWithdraw() public {
+        usdt.mint(address(this), 100);
+        usdt.approve(address(vault), 100);
+        vault.deposit(100);
+        assertEq(vault.totalAssets(), 100);
+        assertEq(vault.totalSharesOfUser(address(this)), 100);
+        assertEq(vault.totalAssetsOfUser(address(this)), 0);
+        vault.withdraw(100);
+        assertEq(vault.totalSharesOfUser(address(this)), 0);
+        assertEq(vault.totalAssetsOfUser(address(this)), 100);
+        assertEq(vault.totalAssets(), 0);
     }
 }

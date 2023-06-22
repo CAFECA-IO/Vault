@@ -11,9 +11,9 @@ contract VaultScript is Script {
     function run() public {
         // vm.broadcast();
         vm.startBroadcast();
-        USDT usdt = new USDT();
+        USDT usdt = new USDT("TideBit USDT", "tbUSDT");
         new Vault(usdt, "Vault USDT", "vUSDT");
-
+        
         vm.stopBroadcast();
     }
 }

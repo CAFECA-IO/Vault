@@ -4,8 +4,7 @@ pragma solidity ^0.8.13;
 import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 contract USDT is ERC20 {
-
-    constructor() ERC20("Vault USDT", "vUSDT") {
+    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
         this;
     }
 
